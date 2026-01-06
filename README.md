@@ -127,13 +127,74 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 ```
 src/
 ├── main.rs           # Entry point and orchestration
+├── lib.rs            # Library exports
 ├── config/           # Configuration management
 ├── polymarket/       # Polymarket websocket client
 ├── kalshi/           # Kalshi websocket client
 ├── common/           # Shared types and traits
 ├── decision/         # Decision-making engine
 └── db/               # External database integration
+
+tests/
+├── polymarket_rest_integration.rs      # REST API integration tests
+├── polymarket_websocket_integration.rs # WebSocket integration tests
+└── common/                             # Test utilities
 ```
+
+## Testing
+
+The project includes comprehensive integration tests for the Polymarket CLOB REST API and WebSocket.
+
+### Running Tests
+
+```bash
+# Run all tests (unit + integration)
+cargo test
+
+# Run only unit tests
+cargo test --lib
+
+# Run REST API integration tests
+cargo test --test polymarket_rest_integration -- --test-threads=1
+
+# Run WebSocket integration tests
+cargo test --test polymarket_websocket_integration -- --test-threads=1
+
+# Run with verbose output
+cargo test -- --nocapture
+
+# Run long-running stress tests (ignored by default)
+cargo test --test polymarket_websocket_integration test_long_running_connection -- --ignored
+```
+
+### Integration Test Coverage
+
+#### REST API Tests
+- API health check
+- Server time retrieval
+- Market discovery (Gamma API)
+- Price data (buy/sell/midpoint/spread)
+- Order book retrieval
+- Last trade price
+- Error handling for invalid inputs
+- Concurrent request handling
+- Data consistency validation
+
+#### WebSocket Tests
+- Connection to market channel
+- Receiving market data (order book updates, trades)
+- Heartbeat/ping-pong handling
+- Multiple token subscriptions
+- Connection state tracking
+- Error handling for invalid URLs
+- Long-running connection stability (stress test)
+
+### Test Notes
+
+1. **Rate Limiting**: Use `--test-threads=1` to avoid hitting API rate limits
+2. **Network Dependency**: Integration tests require internet access to Polymarket APIs
+3. **Market Activity**: Some tests may show fewer events if markets are quiet
+4. **Authentication**: Integration tests use only public endpoints (no API keys required)
 
 ## License
 

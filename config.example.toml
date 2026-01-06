@@ -1,0 +1,33 @@
+[polymarket]
+# API credentials (optional for read-only access)
+# api_key = "your_api_key_here"
+# api_secret = "your_api_secret_here"
+# api_passphrase = "your_passphrase_here"
+
+# API endpoints
+rest_url = "https://clob.polymarket.com"
+websocket_url = "wss://ws-subscriptions-clob.polymarket.com"
+gamma_url = "https://gamma-api.polymarket.com"
+
+# Token IDs to subscribe to (get from Gamma API)
+markets = []
+
+[kalshi]
+# api_key = "your_kalshi_api_key"
+# api_secret = "your_kalshi_api_secret"
+rest_url = "https://trading-api.kalshi.com/trade-api/v2"
+websocket_url = "wss://trading-api.kalshi.com/trade-api/ws/v2"
+markets = []
+
+[database]
+# Uncomment and configure if using decision engine
+# url = "postgresql://user:password@localhost:5432/polymarket"
+# max_connections = 5
+# connection_timeout_seconds = 30
+
+[settings]
+log_level = "info"
+reconnect_delay_ms = 5000
+max_reconnect_attempts = 0
+heartbeat_interval_seconds = 10
+request_timeout_seconds = 30
