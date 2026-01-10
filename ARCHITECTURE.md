@@ -66,7 +66,7 @@ This document describes the technical architecture of the PolymarketWebsocket ap
 ```
 src/
 ├── main.rs                 # Application entry point
-├── lib.rs                  # Library root (optional)
+├── lib.rs                  # Library exports
 │
 ├── config/
 │   ├── mod.rs              # Configuration module root
@@ -104,6 +104,12 @@ src/
     ├── mod.rs              # Database module root
     ├── client.rs           # Database connection and pooling
     └── queries.rs          # Query helpers for decision data
+
+tests/
+├── polymarket_rest_integration.rs      # REST API integration tests
+├── polymarket_websocket_integration.rs # WebSocket integration tests
+└── common/                             # Shared test utilities
+    └── mod.rs
 ```
 
 ## Data Flow
@@ -384,9 +390,83 @@ pub struct AppSettings {
 }
 ```
 
+## Testing Architecture
+
+The project uses a layered testing approach with both unit tests and integration tests.
+
+### Test Structure
+
+```
+tests/
+├── polymarket_rest_integration.rs      # REST API integration tests
+├── polymarket_websocket_integration.rs # WebSocket integration tests
+└── common/                             # Shared test utilities
+    └── mod.rs
+```
+
+### Integration Test Categories
+
+#### REST API Tests (`polymarket_rest_integration.rs`)
+
+Tests for the Polymarket CLOB REST API:
+
+| Test Category | Description |
+|---------------|-------------|
+| Health Checks | API availability and server time |
+| Market Discovery | Fetching markets from Gamma API |
+| Price Data | Buy/sell prices, midpoint, spread calculations |
+| Order Book | Full order book retrieval and validation |
+| Trade Data | Last trade price queries |
+| Error Handling | Invalid input handling, edge cases |
+| Concurrency | Parallel request handling |
+| Data Consistency | Cross-endpoint data validation |
+
+#### WebSocket Tests (`polymarket_websocket_integration.rs`)
+
+Tests for real-time WebSocket connections:
+
+| Test Category | Description |
+|---------------|-------------|
+| Connection | Establishing market channel connections |
+| Data Streaming | Receiving order book updates and trades |
+| Heartbeat | Ping/pong handling for connection health |
+| Subscriptions | Multi-token subscription management |
+| State Tracking | Connection state monitoring |
+| Error Handling | Invalid URL and connection failure cases |
+| Stress Tests | Long-running connection stability (ignored by default) |
+
+### Test Execution Strategy
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Test Pyramid                           │
+│                                                             │
+│                    ┌─────────────┐                          │
+│                    │   E2E/      │  Few, slow, high value   │
+│                    │   Stress    │                          │
+│                    └──────┬──────┘                          │
+│               ┌───────────┴───────────┐                     │
+│               │    Integration Tests   │  Network-dependent │
+│               │    (REST + WebSocket)  │                    │
+│               └───────────┬───────────┘                     │
+│          ┌────────────────┴────────────────┐                │
+│          │          Unit Tests              │  Fast, isolated│
+│          │   (Message parsing, logic, etc.) │                │
+│          └──────────────────────────────────┘                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Test Configuration
+
+- **Rate Limiting**: Tests run single-threaded (`--test-threads=1`) to respect API limits
+- **Network Dependency**: Integration tests require internet access
+- **No Authentication**: Public endpoints only (no API keys required for tests)
+- **Stress Tests**: Long-running tests are `#[ignore]` by default
+
 ## Future Considerations
 
 - **Horizontal Scaling**: Add support for multiple instances with market sharding
 - **Metrics Export**: Prometheus/OpenTelemetry integration for monitoring
 - **Additional Platforms**: Modular design allows adding new prediction market platforms
 - **Replay Mode**: Support for replaying historical data for backtesting
+- **Kalshi Integration Tests**: Add corresponding test coverage for Kalshi APIs
