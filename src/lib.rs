@@ -6,6 +6,7 @@
 pub mod common;
 pub mod config;
 pub mod polymarket;
+pub mod strategy;
 
 // Re-export commonly used types
 pub use common::errors::{ClientError, Result};
@@ -15,3 +16,11 @@ pub use config::types::AppConfig;
 pub use polymarket::client::PolymarketClient;
 pub use polymarket::rest::PolymarketRestClient;
 pub use polymarket::websocket::PolymarketWebSocketClient;
+
+// Strategy types
+pub use strategy::{
+    BoxedSizeCalculator, BoxedStrategy, ComputedSize, Decision, InMemorySizeCalculator,
+    MarketSubscription, Position, SizeCalculator, SizeKey, SizedIntent, SizedLeg, Strategy,
+    StrategyContext, TradeIntent, TradeLeg,
+};
+pub use strategy::{Platform as StrategyPlatform, Side as StrategySide};
