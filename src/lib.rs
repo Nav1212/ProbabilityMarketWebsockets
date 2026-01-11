@@ -19,8 +19,8 @@ pub use polymarket::websocket::PolymarketWebSocketClient;
 
 // Strategy types
 pub use strategy::{
-    BoxedSizeCalculator, BoxedStrategy, ComputedSize, Decision, InMemorySizeCalculator,
-    MarketSubscription, Position, SizeCalculator, SizeKey, SizedIntent, SizedLeg, Strategy,
-    StrategyContext, TradeIntent, TradeLeg,
+    BoxedSizeCalculator, BoxedStrategy, ComputedSize, Decision, FeeCalculator,
+    InMemorySizeCalculator, MarketSubscription, PlatformFees, Position, SizeCalculator, SizeKey,
+    SizedIntent, SizedLeg, Strategy, StrategyContext, TradeIntent, TradeLeg,
 };
 pub use strategy::{Platform as StrategyPlatform, Side as StrategySide};

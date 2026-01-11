@@ -60,13 +60,24 @@ CREATE TABLE market_matches (
 - Using `rust_decimal` crate for financial precision
 
 ### 6. Fee Handling
-- Fees calculated as penalty against trades on each platform
-- Arbitrage detection compares **effective prices** (after fees), not raw prices
-- Polymarket: Most markets have no fees
-- Kalshi: Has fee structure to be implemented
-- TODO: Document specific fee structures
+- **Approach**: Worst-case fee calculation
+- **Implementation**: Fee logic lives inside strategy module as utility functions
+- **Kalshi fees**: 7% of profit (profit-based), only on winning trades, no maker fees
+- **Polymarket fees**: 0% on most markets (hardcoded for now)
+- **Module created**: `src/strategy/fees.rs` with `FeeCalculator` utilities
+- Strategies use `FeeCalculator::arbitrage_profit()` and related functions internally
+- Fees are hardcoded per platform (can be made configurable later if needed)
 
-### 7. Order Execution
+### 7. Strategy System (Dependency Injection)
+- **Pattern**: Trader class receives Strategy implementations via dependency injection
+- **Strategy interface**: Returns Go/NoGo decisions with TradeIntent
+- **TradeIntent**: Contains one or more TradeLeg (for single trades or arbitrage pairs)
+- **SizeCalculator**: Runs asynchronously, pre-computes optimal sizes
+- **Trader**: Grabs pre-computed sizes and executes on Go signal
+- **Module created**: `src/strategy/` with traits, types, and fee utilities
+- Strategies manage their own state, receive StrategyContext for position/balance info
+
+### 8. Order Execution
 - Separate functions for each platform
 - No coupling between Kalshi and Polymarket order logic
 - Arbitrage executor calls both independently
@@ -100,10 +111,11 @@ CREATE TABLE market_matches (
 - [ ] Review workflow (export pending, import approved)
 
 ### Phase 4: Fee Calculation
-- [ ] Fee calculator trait/interface
-- [ ] Polymarket fee implementation
-- [ ] Kalshi fee implementation
-- [ ] Effective price calculation
+- [x] Fee calculator utilities (FeeCalculator struct)
+- [x] Polymarket fee implementation (0%)
+- [x] Kalshi fee implementation (7% profit-based)
+- [x] Effective price calculation (entry cost, exit value, net profit)
+- [x] Arbitrage profit calculation (worst-case fees)
 
 ### Phase 5: Arbitrage Detection
 - [ ] Event aggregator (maintain latest prices)
@@ -127,9 +139,17 @@ CREATE TABLE market_matches (
 ---
 
 ## Open Questions
-- [ ] Specific Kalshi fee structure
-- [ ] Specific Polymarket fee structure (per market type?)
+- [x] ~~Specific Kalshi fee structure~~ - 7% of profit, profit-based
+- [x] ~~Specific Polymarket fee structure~~ - 0% for most markets (hardcoded)
+- [x] ~~Fee calculation approach~~ - Worst-case
+- [x] ~~Fee logic location~~ - Inside strategy module as utilities
 - [ ] LLM provider choice for market matching
 - [ ] Confidence threshold tuning
 - [ ] Execution strategy (simultaneous vs sequential orders)
 - [ ] Position/risk limits
+
+## Completed Modules
+- ✅ `src/strategy/types.rs` - Core types (Decision, TradeIntent, TradeLeg, etc.)
+- ✅ `src/strategy/traits.rs` - Strategy trait definition
+- ✅ `src/strategy/size_calculator.rs` - SizeCalculator trait and implementation
+- ✅ `src/strategy/fees.rs` - Fee calculation utilities

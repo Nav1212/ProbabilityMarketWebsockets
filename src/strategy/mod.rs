@@ -73,6 +73,7 @@
 mod types;
 mod traits;
 mod size_calculator;
+mod fees;
 
 pub use types::{
     Decision,
@@ -96,3 +97,5 @@ pub use size_calculator::{
     SizedIntent,
     SizedLeg,
 };
+
+pub use fees::{FeeCalculator, PlatformFees};
